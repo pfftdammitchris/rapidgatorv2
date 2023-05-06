@@ -1,7 +1,7 @@
 import axios from 'axios'
 import path from 'path'
 import fs from 'node:fs'
-import FormData from 'form-data'
+// import FormData from 'form-data'
 import md5 from 'md5'
 import md5File from 'md5-file'
 import type { AxiosInstance, AxiosResponse, AxiosRequestConfig } from 'axios'
@@ -38,10 +38,16 @@ export class Rapidgator {
 
   #createURL = (pathname: string) => `${Rapidgator.baseURL}${pathname}`
 
+  /**
+   * Logs in to the rapidgator api in exchange for an access token along with the {@link t.UserObject}.
+   * An access token is required for most API endpoints.
+   */
   async login() {
     const url = this.#createURL('/api/v2/user/login')
 
-    const response = await this.#req.get<t.LoginResponse>(url, {
+    const response = await this.#req.get<
+      t.Response<{ token: string; user: t.UserObject }>
+    >(url, {
       params: {
         login: this.username,
         password: this.#password,
@@ -57,10 +63,13 @@ export class Rapidgator {
     return response.data
   }
 
+  /**
+   * Retrieves the {@link t.UserObject}
+   */
   async getProfile() {
     const url = this.#createURL('/api/v2/user/info')
     return (
-      await this.#req.get<t.GetProfileResponse>(url, {
+      await this.#req.get<t.Response<{ user: t.UserObject }>>(url, {
         params: {
           token: this.#token,
         },
@@ -195,11 +204,6 @@ export class Rapidgator {
       >(url, { params })
     ).data
   }
-
-  async processUpload(
-    url: string,
-    encodingType: LiteralUnion<'multipart/form-data', string>,
-  ) {}
 
   /* -------------------------------------------------------
     ---- FILES
@@ -445,6 +449,7 @@ export class Rapidgator {
 
   /**
    * Returns a folder's info as well as its sub folders.
+   * @param id The folder id.
    */
   async getFolder(id?: string) {
     const url = this.#createURL(`/api/v2/folder/info`)
@@ -458,7 +463,8 @@ export class Rapidgator {
   }
 
   /**
-   * Returns a folder's, list of sub folders and list of files details.
+   * Returns a {@link t.FolderObject} including its sub folders.
+   * @param options Options for retrieving the {@link t.FolderObject} and its sub folders.
    */
   async getFolderContent(options?: {
     folderId?: string
@@ -498,9 +504,8 @@ export class Rapidgator {
 
   /**
    * Creates a folder.
-   * @param name
-   * @param folderId
-   * @returns
+   * @param name The folder name.
+   * @param folderId Optionally, the folder ID to create a new folder in.
    */
   async createFolder(name: string, folderId?: string) {
     const url = this.#createURL(`/api/v2/folder/create`)
@@ -518,6 +523,7 @@ export class Rapidgator {
 
   /**
    * Removes a folder.
+   * @param folderId The folder ID.
    */
   async removeFolder(folderId: string) {
     const url = this.#createURL(`/api/v2/folder/delete`)
@@ -539,6 +545,8 @@ export class Rapidgator {
 
   /**
    * Renames a folder.
+   * @param folderId The folder ID to rename.
+   * @param newName The new name for the folder.
    */
   async renameFolder(folderId: string, newName: string) {
     const url = this.#createURL(`/api/v2/folder/rename`)
@@ -553,6 +561,8 @@ export class Rapidgator {
   /**
    * Copies a folder to another folder.
    * Note: This operation also works with foreign folders.
+   * @param sourceFolderId Source folder ID.
+   * @param targetFolderId Target folder ID.
    */
   async copyFolder(sourceFolderId: string | string[], targetFolderId: string) {
     const url = this.#createURL(`/api/v2/folder/copy`)
@@ -582,6 +592,8 @@ export class Rapidgator {
   /**
    * Moves a folder to another folder.
    * Note: This also works with foreign folders.
+   * @param sourceFolderId A source folder ID or a list of folder IDs.
+   * @param targetFolderId Target folder ID.
    */
   async moveFolder(sourceFolderId: string | string[], targetFolderId: string) {
     const url = this.#createURL(`/api/v2/folder/move`)
@@ -613,9 +625,8 @@ export class Rapidgator {
 
   /**
    * Changes a folder's mode.
-   * @param folderId
-   * @param mode
-   * @returns
+   * @param folderId The folder ID.
+   * @param mode The mode to update the folder with.
    */
   async updateFolderMode(folderId: string, mode: number) {
     const url = this.#createURL(`/api/v2/folder/change_mode`)

@@ -1,8 +1,15 @@
 import type { LiteralUnion, Promisable } from 'type-fest'
+import type { Rapidgator } from './rapidgatorv2'
 import * as c from './constants'
 
+/**
+ * Response details as a member of the {@link Response} object.
+ */
 export type ResponseDetails = LiteralUnion<ResponseErrorMessage, string>
 
+/**
+ * Error messages that can be returned by different APIs.
+ */
 export type ResponseErrorMessage =
   | 'Error: Login or password is wrong'
   | 'Error: Invalid auth code'
@@ -18,51 +25,68 @@ export type ResponseErrorMessage =
   | 'Error: Folder not found'
   | 'Error: Session not exist'
 
+/**
+ * The state label for a {@link Response}
+ */
 export type ResponseStateLabel = LiteralUnion<
   'Activated' | 'Done' | 'Uploading',
   string
 >
+
+/**
+ * The mode label representing a mode state.
+ */
 export type ResponseModeLabel = LiteralUnion<'Premium Only', string>
 
+/**
+ * The status code received in a response for an http request.
+ */
 export type ResponseStatusCode = LiteralUnion<200 | 401, number>
 
+/**
+ * The response object returned from each endpoint.
+ */
 export type Response<R = any> = {
   response: R
   status: ResponseStatusCode
   details?: null | ResponseDetails
 }
 
-export type LoginResponse = Response<{
-  token: string
-  user: {
-    email: string
-    is_premium: boolean
-    premium_end_time: null | string
-    state: LiteralUnion<1, number>
-    state_label: LiteralUnion<'Activated', string>
-    traffic: {
-      total: null | number
-      left: null | number
-    }
-    storage: {
-      total: string // '4398046511104'
-      left: number // 4398035213138
-    }
-    upload: {
-      max_file_size: number
-      nb_pipes: number
-    }
-    remote_upload: {
-      max_nb_jobs: number
-      refresh_time: number
-    }
+/**
+ * The mode label
+ */
+export type ModeLabel = 'Public' | 'Premium Only' | 'Private' | 'Hotlink'
+
+/**
+ * The user object profile.
+ */
+export interface UserObject {
+  email: string
+  is_premium: boolean
+  premium_end_time: null | string
+  state: LiteralUnion<1, number>
+  state_label: LiteralUnion<'Activated', string>
+  traffic: {
+    total: null | number
+    left: null | number
   }
-}>
+  storage: {
+    total: string // '4398046511104'
+    left: number // 4398035213138
+  }
+  upload: {
+    max_file_size: number
+    nb_pipes: number
+  }
+  remote_upload: {
+    max_nb_jobs: number
+    refresh_time: number
+  }
+}
 
-export type GetProfileResponse = Response<
-  Omit<LoginResponse['response'], 'token'>
->
-
+/**
+ * The link object returned as a generated result for APIs such as {@link Rapidgator.createOneTimeLink}
+ */
 export interface LinkObject {
   link_id: string
   file: FileObject
@@ -75,6 +99,9 @@ export interface LinkObject {
   downloaded: boolean
 }
 
+/**
+ * The file object returned when working with files such as {@link Rapidgator.createFolder}
+ */
 export interface FileObject {
   file_id?: string
   folder_id?: string
@@ -87,6 +114,9 @@ export interface FileObject {
   url?: string
 }
 
+/**
+ * The folder object returned when working with folders such as {@link Rapidgator.createFolder}
+ */
 export interface FolderObject {
   folder_id?: string
   mode?: c.FileMode
@@ -100,5 +130,3 @@ export interface FolderObject {
   created?: number // Timestamp
   folders?: FolderObject[]
 }
-
-export type ModeLabel = 'Public' | 'Premium Only' | 'Private' | 'Hotlink'

@@ -46,3 +46,5 @@ Start by requiring the client:
 ```js
 const { Rapidgator } = require('rapidgatorv2')
 ```
+
+Read the full documentation API (Coming soon)

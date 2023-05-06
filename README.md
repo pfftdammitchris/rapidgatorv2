@@ -2,7 +2,7 @@
 
 **Note: This library has just started. Pull requests are welcomed!**
 
-JavaScript Node.js library for rapidgator's V2 API ([rapidgator.net](https://rapidgator.net/api/v2))
+JavaScript Node.js library for rapidgator's V2 API ([rapidgator.net](https://rapidgator.net/article/api))
 
 ## Installation
 

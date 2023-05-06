@@ -26,6 +26,7 @@
     "tslib": "^2.5.0",
     "tsup": "^6.5.0",
     "type-fest": "^3.10.0",
+    "typedoc": "^0.24.6",
     "typescript": "^5.0.4"
   },
   "directories": {
@@ -46,7 +47,6 @@
     "rapidgator",
     "rapidgatorv2"
   ],
-  "readme": "README.md",
   "eslintConfig": {
     "env": {
       "es2020": true,

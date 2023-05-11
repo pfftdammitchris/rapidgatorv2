@@ -4,7 +4,7 @@ import fs from 'node:fs'
 // import FormData from 'form-data'
 import md5 from 'md5'
 import md5File from 'md5-file'
-import type { AxiosInstance, AxiosResponse, AxiosRequestConfig } from 'axios'
+import type { AxiosInstance, AxiosRequestConfig } from 'axios'
 import type { LiteralUnion } from 'type-fest'
 import * as util from './utils'
 import * as c from './constants'
@@ -14,6 +14,7 @@ export class Rapidgator {
   #password: string
   #token: string
   #req: AxiosInstance
+  #requestConfig: AxiosRequestConfig
   username: string
 
   static baseURL = 'https://rapidgator.net'
@@ -22,6 +23,7 @@ export class Rapidgator {
     this.username = username
     this.#password = password
     this.#token = ''
+    this.#requestConfig = { baseURL: Rapidgator.baseURL }
 
     if (!this.username) {
       throw new Error(`Username cannot be empty`)
@@ -31,12 +33,18 @@ export class Rapidgator {
       throw new Error(`Password cannot be empty`)
     }
 
-    this.#req = axios.create({
-      baseURL: Rapidgator.baseURL,
-    })
+    this.#req = axios.create(this.#requestConfig)
   }
 
   #createURL = (pathname: string) => `${Rapidgator.baseURL}${pathname}`
+
+  get requestConfig() {
+    return this.#requestConfig
+  }
+
+  set requestConfig(requestConfig) {
+    this.#requestConfig = requestConfig
+  }
 
   /**
    * Logs in to the rapidgator api in exchange for an access token along with the {@link t.UserObject}.
@@ -48,6 +56,7 @@ export class Rapidgator {
     const response = await this.#req.get<
       t.Response<{ token: string; user: t.UserObject }>
     >(url, {
+      ...this.#requestConfig,
       params: {
         login: this.username,
         password: this.#password,
@@ -70,6 +79,7 @@ export class Rapidgator {
     const url = this.#createURL('/api/v2/user/info')
     return (
       await this.#req.get<t.Response<{ user: t.UserObject }>>(url, {
+        ...this.#requestConfig,
         params: {
           token: this.#token,
         },
@@ -174,6 +184,7 @@ export class Rapidgator {
         }
       }>
     >(url, {
+      ...this.#requestConfig,
       params,
     })
 
@@ -201,7 +212,7 @@ export class Rapidgator {
             >
           }
         }>
-      >(url, { params })
+      >(url, { ...this.#requestConfig, params })
     ).data
   }
 
@@ -226,7 +237,7 @@ export class Rapidgator {
             status: 'ACCESS' | 'NO ACCESS'
           }>
         >
-      >(url, { params })
+      >(url, { ...this.#requestConfig, params })
     ).data
   }
 
@@ -255,7 +266,10 @@ export class Rapidgator {
     }
 
     return (
-      await this.#req.get<t.Response<{ link: t.LinkObject }>>(url, { params })
+      await this.#req.get<t.Response<{ link: t.LinkObject }>>(url, {
+        ...this.#requestConfig,
+        params,
+      })
     ).data
   }
 
@@ -274,9 +288,7 @@ export class Rapidgator {
         t.Response<{
           links: (t.LinkObject | { link_id: string; error: 'Link not found' })[]
         }>
-      >(url, {
-        params,
-      })
+      >(url, { ...this.#requestConfig, params })
     ).data
   }
 
@@ -290,7 +302,7 @@ export class Rapidgator {
     return (
       await this.#req.get<t.Response<{ download_url: string; delay: number }>>(
         url,
-        { params },
+        { ...this.#requestConfig, params },
       )
     ).data
   }
@@ -303,7 +315,10 @@ export class Rapidgator {
     const url = this.#createURL('/api/v2/file/info')
     const params = { file_id: fileId }
     return (
-      await this.#req.get<t.Response<{ file: t.FileObject }>>(url, { params })
+      await this.#req.get<t.Response<{ file: t.FileObject }>>(url, {
+        ...this.#requestConfig,
+        params,
+      })
     ).data
   }
 
@@ -325,7 +340,7 @@ export class Rapidgator {
             errors: t.ResponseErrorMessage[]
           }
         }>
-      >(url, { params })
+      >(url, { ...this.#requestConfig, params })
     ).data
   }
 
@@ -341,7 +356,7 @@ export class Rapidgator {
         t.Response<{
           file: t.FileObject
         }>
-      >(url, { params })
+      >(url, { ...this.#requestConfig, params })
     ).data
   }
 
@@ -354,7 +369,10 @@ export class Rapidgator {
     const url = this.#createURL('/api/v2/file/rename')
     const params = { file_id: fileId, name: newFileName }
     return (
-      await this.#req.get<t.Response<{ file: t.FileObject }>>(url, { params })
+      await this.#req.get<t.Response<{ file: t.FileObject }>>(url, {
+        ...this.#requestConfig,
+        params,
+      })
     ).data
   }
 
@@ -377,7 +395,7 @@ export class Rapidgator {
             errors: t.ResponseErrorMessage[]
           }
         }>
-      >(url, { params })
+      >(url, { ...this.#requestConfig, params })
     ).data
   }
 
@@ -401,7 +419,10 @@ export class Rapidgator {
     }
 
     return (
-      await this.#req.get<t.Response<{ file: t.FileObject }>>(url, { params })
+      await this.#req.get<t.Response<{ file: t.FileObject }>>(url, {
+        ...this.#requestConfig,
+        params,
+      })
     ).data
   }
 
@@ -416,7 +437,10 @@ export class Rapidgator {
     const params = { hash, name: filename, folder_id_dest: folderId }
 
     return (
-      await this.#req.get<t.Response<{ file: t.FileObject }>>(url, { params })
+      await this.#req.get<t.Response<{ file: t.FileObject }>>(url, {
+        ...this.#requestConfig,
+        params,
+      })
     ).data
   }
 
@@ -439,7 +463,7 @@ export class Rapidgator {
             errors: t.ResponseErrorMessage[]
           }
         }>
-      >(url, { params })
+      >(url, { ...this.#requestConfig, params })
     ).data
   }
 
@@ -457,6 +481,7 @@ export class Rapidgator {
     if (id) params.folder_id = id
     return (
       await this.#req.get<t.Response<{ folder: t.FolderObject }>>(url, {
+        ...this.#requestConfig,
         params,
       })
     ).data
@@ -498,7 +523,7 @@ export class Rapidgator {
           folder: t.FolderObject & { files: t.FileObject[] }
           pager: { current: number; total: number }
         }>
-      >(url, { params })
+      >(url, { ...this.#requestConfig, params })
     ).data
   }
 
@@ -516,6 +541,7 @@ export class Rapidgator {
         folder: t.FolderObject
       }>
     >(url, {
+      ...this.#requestConfig,
       params,
     })
     return response.data
@@ -539,7 +565,7 @@ export class Rapidgator {
             errors: t.ResponseErrorMessage[]
           }
         }>
-      >(url, { params })
+      >(url, { ...this.#requestConfig, params })
     ).data
   }
 
@@ -553,6 +579,7 @@ export class Rapidgator {
     const params = { name: newName, folder_id: folderId }
     return (
       await this.#req.get<t.Response<{ folder: t.FolderObject }>>(url, {
+        ...this.#requestConfig,
         params,
       })
     ).data
@@ -585,7 +612,7 @@ export class Rapidgator {
             errors: t.ResponseErrorMessage[]
           }
         }>
-      >(url, { params })
+      >(url, { ...this.#requestConfig, params })
     ).data
   }
 
@@ -619,7 +646,7 @@ export class Rapidgator {
             errors: t.ResponseErrorMessage[]
           }
         }>
-      >(url, { params })
+      >(url, { ...this.#requestConfig, params })
     ).data
   }
 
@@ -633,6 +660,7 @@ export class Rapidgator {
     const params = { folder_id: folderId, mode }
     return (
       await this.#req.get<t.Response<{ folder: t.FolderObject }>>(url, {
+        ...this.#requestConfig,
         params,
       })
     ).data
